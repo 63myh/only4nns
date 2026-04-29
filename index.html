@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snoodi Coffee</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 20px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .music-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            z-index: 1000;
+        }
+        
+        .music-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .music-btn:active {
+            transform: scale(0.95);
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+            padding-right: 60px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+            font-size: 0.95em;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1em;
+            line-height: 1.4;
+        }
+        
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .menu-item {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-height: 80px;
+            justify-content: center;
+        }
+        
+        .menu-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .menu-item.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+        
+        .item-price {
+            font-size: 1.1em;
+            color: #764ba2;
+            font-weight: bold;
+        }
+        
+        .menu-item.selected .item-price {
+            color: white;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            touch-action: manipulation;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .order-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        
+        .total {
+            border-top: 2px solid #667eea;
+            padding-top: 15px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .receipt {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .receipt h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .checkmark {
+            font-size: 50px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        
+        .skip-btn {
+            background: #6c757d;
+            margin-top: 15px;
+        }
+        
+        .warning-text {
+            color: #dc3545;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.4;
+        }
+        
+        .info-text {
+            color: #28a745;
+            font-size: 1em;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.4;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px 15px;
+            }
+            
+            h1 {
+                font-size: 1.6em;
+            }
+            
+            .subtitle {
+                font-size: 0.85em;
+            }
+            
+            .menu-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            
+            .menu-item {
+                padding: 10px;
+                min-height: 70px;
+            }
+            
+            .item-name {
+                font-size: 0.85em;
+            }
+            
+            .item-price {
+                font-size: 1em;
+            }
+            
+            button {
+                padding: 12px;
+                font-size: 15px;
+            }
+            
+            .music-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+                top: 15px;
+                right: 15px;
+            }
+            
+            label {
+                font-size: 0.95em;
+            }
+            
+            .total {
+                font-size: 1.2em;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="music-btn" onclick="playMusic()" title="Play Music">🎵</button>
+        
+        <h1>☕ Snoodi Coffee</h1>
+        <p class="subtitle">hello, welcome to snoody coffee!!!!!</p>
+        
+        <!-- Welcome Screen -->
+        <div class="screen active" id="welcomeScreen">
+            <div class="input-group">
+                <label for="nameInput">whats ur name?</label>
+                <input type="text" id="nameInput" placeholder="Enter your name">
+            </div>
+            <button onclick="enterName()">Continue</button>
+        </div>
+        
+        <!-- Bot Question Screen -->
+        <div class="screen" id="botScreen">
+            <p class="info-text" id="botIntro"></p>
+            <div class="input-group">
+                <label for="kissesInput">hi im boodi's bot, to get in i need to know how many kisses did u give boodi 2day?</label>
+                <input type="number" id="kissesInput" placeholder="Number of kisses" min="0">
+            </div>
+            <button onclick="checkKisses()">Submit</button>
+        </div>
+        
+        <!-- Bad Girl Screen -->
+        <div class="screen" id="badGirlScreen">
+            <p class="warning-text">whyyy??? go now kiss him more or ur not getting in</p>
+            <button onclick="badGirlYes()">Okay, I will!</button>
+            <button class="skip-btn" onclick="badGirlNo()">No</button>
+        </div>
+        
+        <!-- Rejected Screen -->
+        <div class="screen" id="rejectedScreen">
+            <div class="receipt">
+                <div style="font-size: 50px; margin-bottom: 20px;">😠</div>
+                <h2 style="color: #dc3545;">u r not welcome here! get ouut!!</h2>
+                <button onclick="restart()">Try Again</button>
+            </div>
+        </div>
+        
+        <!-- Menu Screen - First Order -->
+        <div class="screen" id="menuScreen">
+            <p class="info-text" id="welcomeBack"></p>
+            <h2 style="margin-bottom: 20px; color: #333; font-size: 1.3em;">here's the menu of the day:</h2>
+            <div class="menu-grid" id="menuGrid"></div>
+            <button onclick="selectFirstOrder()">Continue</button>
+        </div>
+        
+        <!-- Second Order Screen -->
+        <div class="screen" id="orderScreen">
+            <h2 style="margin-bottom: 20px; color: #333; font-size: 1.3em;">do you want anything eles?</h2>
+            <div class="menu-grid" id="menuGrid2"></div>
+            <button onclick="finishOrder()">Complete Order</button>
+            <button class="skip-btn" onclick="skipSecondOrder()">No</button>
+        </div>
+        
+        <!-- Receipt Screen -->
+        <div class="screen" id="receiptScreen">
+            <div class="receipt">
+                <div class="checkmark">✓</div>
+                <h2>Great!</h2>
+                <div id="receiptContent"></div>
+                <button onclick="restart()">New Order</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const menu = {
+            "black coffee": 5,
+            "matcha": 7,
+            "latte": 6,
+            "espresso": 4,
+            "tea": 3,
+            "cookies": 2,
+            "brownies": 4,
+            "cheesecake": 8
+        };
+
+        let customerName = "";
+        let order1 = null;
+        let order2 = null;
+
+        function playMusic() {
+            window.open('https://open.spotify.com/playlist/2wdxVlSFvcb4UGlaLRtJgo?si=fa7db614cab24869', '_blank');
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function enterName() {
+            customerName = document.getElementById('nameInput').value.trim();
+            if (!customerName) {
+                alert("Please enter your name!");
+                return;
+            }
+            
+            document.getElementById('botIntro').textContent = `first ${customerName}, to enter my coffee, my bot well ask u sm Q, DONT LIE PLZ`;
+            showScreen('botScreen');
+        }
+
+        function checkKisses() {
+            const kisses = parseInt(document.getElementById('kissesInput').value);
+            
+            if (isNaN(kisses)) {
+                alert("Please enter a number!");
+                return;
+            }
+            
+            if (kisses < 5) {
+                showScreen('badGirlScreen');
+            } else {
+                document.getElementById('welcomeBack').textContent = `hello again ${customerName}, or should i say boodi's moon, tyy for coming 2day >_<`;
+                showScreen('menuScreen');
+                createMenuItems('menuGrid');
+            }
+        }
+
+        function badGirlYes() {
+            document.getElementById('welcomeBack').textContent = `Good girl, now i know why boodi loves u that much, u can come in >_<\n\nhello again ${customerName}, or should i say boodi's moon, tyy for coming 2day >_<`;
+            showScreen('menuScreen');
+            createMenuItems('menuGrid');
+        }
+
+        function badGirlNo() {
+            showScreen('rejectedScreen');
+        }
+
+        function createMenuItems(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = "";
+            
+            for (let [item, price] of Object.entries(menu)) {
+                const div = document.createElement('div');
+                div.className = 'menu-item';
+                div.onclick = () => selectItem(div, item, containerId);
+                div.innerHTML = `
+                    <span class="item-name">${item}</span>
+                    <span class="item-price">$${price}</span>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function selectItem(element, item, containerId) {
+            const container = document.getElementById(containerId);
+            const items = container.querySelectorAll('.menu-item');
+            items.forEach(i => i.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            if (containerId === 'menuGrid') {
+                order1 = item;
+            } else {
+                order2 = item;
+            }
+        }
+
+        function selectFirstOrder() {
+            if (!order1) {
+                alert("Please select an item from the menu!");
+                return;
+            }
+            
+            showScreen('orderScreen');
+            createMenuItems('menuGrid2');
+        }
+
+        function skipSecondOrder() {
+            order2 = null;
+            showReceipt();
+        }
+
+        function finishOrder() {
+            if (!order2) {
+                alert("Please select an item or click 'No'");
+                return;
+            }
+            showReceipt();
+        }
+
+        function showReceipt() {
+            let total = menu[order1];
+            let receiptHTML = `
+                <div class="order-summary">
+            `;
+            
+            if (order2) {
+                total += menu[order2];
+                receiptHTML += `<h3 style="margin-bottom: 15px;">Your orders are: ${order1} and ${order2}</h3>`;
+                receiptHTML += `
+                    <div class="order-item">
+                        <span>${order1}</span>
+                        <span>$${menu[order1]}</span>
+                    </div>
+                    <div class="order-item">
+                        <span>${order2}</span>
+                        <span>$${menu[order2]}</span>
+                    </div>
+                `;
+            } else {
+                receiptHTML += `<h3 style="margin-bottom: 15px;">Your order is: ${order1}</h3>`;
+                receiptHTML += `
+                    <div class="order-item">
+                        <span>${order1}</span>
+                        <span>$${menu[order1]}</span>
+                    </div>
+                `;
+            }
+            
+            receiptHTML += `
+                    <div class="total">
+                        <span>Total</span>
+                        <span>$${total}</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('receiptContent').innerHTML = receiptHTML;
+            showScreen('receiptScreen');
+        }
+
+        function restart() {
+            order1 = null;
+            order2 = null;
+            customerName = "";
+            document.getElementById('nameInput').value = "";
+            document.getElementById('kissesInput').value = "";
+            showScreen('welcomeScreen');
+        }
+    </script>
+</body>
+</html>
