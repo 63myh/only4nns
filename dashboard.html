@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>✨ Boodi's Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Nunito:wght@300;400;600;700;800&family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ──────────────────────────────────────────────────────────── */
+:root {
+  --bg:           #120d1e;
+  --bg-mid:       #1a1128;
+  --bg-deep:      #0e0a18;
+  --panel:        rgba(38, 22, 60, 0.72);
+  --panel-solid:  #1e1535;
+  --border:       rgba(180, 140, 255, 0.18);
+  --border-glow:  rgba(200, 160, 255, 0.35);
+
+  --lav:          #c4a8ff;
+  --lav-dim:      #8b6bbf;
+  --lav-soft:     rgba(196,168,255,0.12);
+  --blush:        #ffb3d9;
+  --ice:          #b8e8ff;
+  --gold-fairy:   #f9e4a0;
+  --mint:         #a8f0d8;
+
+  --text:         #ede4ff;
+  --text-dim:     #8e7aaa;
+  --text-faint:   rgba(237,228,255,0.35);
+
+  --sleep-a:  #7ba7f5;  --sleep-b:  #b3ccff;
+  --mood-a:   #f585b8;  --mood-b:   #ffb3d9;
+  --hunger-a: #f5a96b;  --hunger-b: #ffd4a8;
+  --study-a:  #a48cf5;  --study-b:  #c9b8ff;
+  --kiss-a:   #f55e7a;  --kiss-b:   #ffaabb;
+
+  --r:    28px;
+  --r-sm: 16px;
+  --r-lg: 40px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: 'Nunito', 'Tajawal', sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+body[dir="rtl"] { font-family: 'Tajawal', 'Nunito', sans-serif; }
+
+/* Layered dreamy bg */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 10%,  rgba(120,60,200,0.28) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 85% 20%,  rgba(80,40,160,0.20)  0%, transparent 60%),
+    radial-gradient(ellipse 70% 60% at 50% 100%, rgba(60,20,130,0.32)  0%, transparent 70%),
+    linear-gradient(160deg, #120d1e 0%, #0e0a18 100%);
+  pointer-events: none;
+}
+
+/* Grain texture */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  opacity: 0.45;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+}
+
+/* Mist blobs */
+.mist {
+  position: fixed; z-index: 0; pointer-events: none;
+  border-radius: 50%;
+  filter: blur(90px);
+  animation: mistDrift var(--md) ease-in-out var(--mdelay) infinite alternate;
+}
+@keyframes mistDrift {
+  from { transform: translate(0,0) scale(1);    opacity: var(--mo); }
+  to   { transform: translate(var(--mx),var(--my)) scale(1.18); opacity: calc(var(--mo)*0.55); }
+}
+
+/* Sparkle field */
+.sparkle-field {
+  position: fixed; inset: 0; z-index: 1;
+  pointer-events: none; overflow: hidden;
+}
+.sp {
+  position: absolute;
+  width: var(--sz); height: var(--sz);
+  background: var(--col);
+  clip-path: polygon(50% 0%,53% 46%,100% 50%,53% 54%,50% 100%,47% 54%,0% 50%,47% 46%);
+  animation: spTwinkle var(--dur) ease-in-out var(--delay) infinite alternate;
+  opacity: 0;
+  filter: blur(var(--bl));
+}
+@keyframes spTwinkle {
+  0%   { opacity:0;          transform:scale(0.3) rotate(0deg);  }
+  45%  { opacity:var(--op);  transform:scale(1)   rotate(22deg); }
+  100% { opacity:var(--op2); transform:scale(0.6) rotate(48deg); }
+}
+
+/* ── LAYOUT ──────────────────────────────────────────────────────────── */
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px 52px;
+  position: relative; z-index: 2;
+}
+
+/* ── TOP BAR ─────────────────────────────────────────────────────────── */
+.top-bar {
+  display: flex; justify-content: flex-end;
+  gap: 10px; padding: 18px 20px 0;
+  position: relative; z-index: 3;
+}
+
+.btn-pill {
+  background: rgba(38,22,60,0.6);
+  border: 1px solid var(--border-glow);
+  color: var(--lav);
+  padding: 8px 20px;
+  font-family: inherit; font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; border-radius: var(--r-lg);
+  transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  backdrop-filter: blur(12px);
+  position: relative; overflow: hidden;
+}
+.btn-pill::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 120%, rgba(196,168,255,0.22), transparent 70%);
+  opacity: 0; transition: opacity 0.3s;
+}
+.btn-pill:hover { transform: translateY(-2px); }
+.btn-pill:hover::before { opacity: 1; }
+
+.btn-lang { color: var(--ice); border-color: rgba(184,232,255,0.28); }
+.btn-lang:hover { border-color: var(--ice); box-shadow: 0 0 20px rgba(184,232,255,0.28), inset 0 0 18px rgba(184,232,255,0.06); color: #d8f4ff; }
+
+.btn-trophy { color: var(--gold-fairy); border-color: rgba(249,228,160,0.28); }
+.btn-trophy:hover { border-color: var(--gold-fairy); box-shadow: 0 0 20px rgba(249,228,160,0.28), inset 0 0 18px rgba(249,228,160,0.06); color: #fff8d6; }
+.btn-sound { color: var(--blush); border-color: rgba(255,179,217,0.28); }
+.btn-sound:hover { border-color: var(--blush); box-shadow: 0 0 20px rgba(255,179,217,0.28), inset 0 0 18px rgba(255,179,217,0.06); color: #fff; }
+.btn-reset { color: #ff9494; border-color: rgba(255,148,148,0.28); }
+.btn-reset:hover { border-color: #ff9494; box-shadow: 0 0 20px rgba(255,148,148,0.28), inset 0 0 18px rgba(255,148,148,0.06); color: #ffe6e6; background: rgba(255,148,148,0.1); }
+
+/* ── HEADER ──────────────────────────────────────────────────────────── */
+header {
+  text-align: center; padding: 28px 20px 34px;
+  position: relative; z-index: 2;
+}
+
+.header-crown {
+  font-size: 2rem; display: block; margin-bottom: 6px;
+  animation: floatCrown 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 14px rgba(249,228,160,0.75));
+}
+@keyframes floatCrown {
+  0%,100% { transform: translateY(0) rotate(-4deg); }
+  50%      { transform: translateY(-10px) rotate(4deg); }
+}
+
+.header-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(1.25rem, 3.5vw, 2.3rem);
+  font-weight: 700; letter-spacing: 1px;
+  background: linear-gradient(135deg, #d4b0ff 0%, #ffb3d9 48%, #b8e8ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block; line-height: 1.35;
+  animation: titleGlow 5s ease-in-out infinite;
+}
+@keyframes titleGlow {
+  0%,100% { filter: drop-shadow(0 0 10px rgba(212,176,255,0.45)); }
+  50%      { filter: drop-shadow(0 0 24px rgba(255,179,217,0.55)) drop-shadow(0 0 45px rgba(184,232,255,0.18)); }
+}
+
+.header-wisp {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; margin-top: 14px;
+}
+.wisp-line {
+  height: 1px; width: 70px;
+  background: linear-gradient(90deg, transparent, rgba(196,168,255,0.45), transparent);
+  border-radius: 100px;
+}
+.wisp-gem {
+  font-size: 0.7rem;
+  filter: drop-shadow(0 0 5px rgba(196,168,255,0.8));
+  animation: gemPulse 2.8s ease-in-out infinite alternate;
+}
+@keyframes gemPulse { from{opacity:0.5;} to{opacity:1;} }
+.header-sub {
+  color: var(--text-dim); font-size: 0.76rem; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase;
+}
+
+/* ── PANEL ───────────────────────────────────────────────────────────── */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 26px 28px;
+  margin-bottom: 18px;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  transition: box-shadow 0.4s;
+}
+.panel:hover {
+  box-shadow: 0 8px 48px rgba(100,50,200,0.16), 0 0 0 1px rgba(196,168,255,0.1);
+}
+/* shimmer top edge */
+.panel::before {
+  content: '';
+  position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196,168,255,0.55), rgba(255,179,217,0.35), rgba(196,168,255,0.55), transparent);
+  border-radius: 100px;
+}
+/* corner glyph */
+.panel::after {
+  content: '✦';
+  position: absolute; top: 10px; right: 14px;
+  font-size: 0.5rem; color: rgba(196,168,255,0.28);
+  pointer-events: none;
+}
+body[dir="rtl"] .panel::after { right: auto; left: 14px; }
+
+.panel-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 0.66rem; font-weight: 400;
+  letter-spacing: 3px; color: var(--lav);
+  text-transform: uppercase; margin-bottom: 22px;
+  display: flex; align-items: center; gap: 10px;
+}
+.panel-title::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(196,168,255,0.22), transparent);
+}
+body[dir="rtl"] .panel-title::after {
+  background: linear-gradient(270deg, rgba(196,168,255,0.22), transparent);
+}
+
+/* ── PROGRESS BARS ───────────────────────────────────────────────────── */
+.stat-row { margin-bottom: 18px; }
+.stat-row:last-child { margin-bottom: 0; }
+
+.stat-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px; font-size: 0.9rem; font-weight: 700;
+}
+.stat-label { display: flex; align-items: center; gap: 8px; }
+.stat-level {
+  background: rgba(196,168,255,0.15);
+  color: var(--lav);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  margin-left: 8px;
+  border: 1px solid rgba(196,168,255,0.3);
+}
+body[dir="rtl"] .stat-level { margin-left: 0; margin-right: 8px; }
+.stat-value {
+  font-size: 0.78rem; font-weight: 800; letter-spacing: 1px;
+  color: var(--lav); min-width: 38px; text-align: right;
+}
+body[dir="rtl"] .stat-value { text-align: left; }
+
+.bar-track {
+  width: 100%; height: 13px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 100px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.28);
+}
+.bar-fill {
+  height: 100%; border-radius: 100px;
+  transition: width 0.7s cubic-bezier(0.34,1.4,0.64,1);
+  position: relative;
+}
+/* moving shimmer */
+.bar-fill::after {
+  content: '';
+  position: absolute; top: 1px; left: 0; right: 0; height: 45%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.38) 50%, transparent 100%);
+  background-size: 200% 100%;
+  border-radius: 100px;
+  animation: barShine 2.8s ease-in-out infinite;
+}
+@keyframes barShine {
+  0%   { background-position: -100% 0; opacity: 0.3; }
+  50%  { background-position:  100% 0; opacity: 0.85; }
+  100% { background-position:  300% 0; opacity: 0.3; }
+}
+
+.bar-sleep  .bar-fill { background: linear-gradient(90deg, var(--sleep-a), var(--sleep-b)); box-shadow: 0 0 16px rgba(123,167,245,0.4); }
+.bar-mood   .bar-fill { background: linear-gradient(90deg, var(--mood-a),  var(--mood-b));  box-shadow: 0 0 16px rgba(245,133,184,0.4); }
+.bar-hunger .bar-fill { background: linear-gradient(90deg, var(--hunger-a),var(--hunger-b));box-shadow: 0 0 16px rgba(245,169,107,0.4); }
+.bar-study  .bar-fill { background: linear-gradient(90deg, var(--study-a), var(--study-b)); box-shadow: 0 0 16px rgba(164,140,245,0.4); }
+.bar-kiss   .bar-fill { background: linear-gradient(90deg, var(--kiss-a),  var(--kiss-b));  box-shadow: 0 0 16px rgba(245,94,122,0.4); }
+
+@keyframes barMaxPulse {
+  0%,100% { box-shadow: 0 0 14px currentColor; }
+  50%      { box-shadow: 0 0 32px currentColor, 0 0 60px rgba(255,255,255,0.08); }
+}
+.bar-sleep  .bar-fill.maxed { color:#b3ccff; animation:barMaxPulse 2s ease-in-out infinite; }
+.bar-mood   .bar-fill.maxed { color:#ffb3d9; animation:barMaxPulse 2s ease-in-out infinite; }
+.bar-hunger .bar-fill.maxed { color:#ffd4a8; animation:barMaxPulse 2s ease-in-out infinite; }
+.bar-study  .bar-fill.maxed { color:#c9b8ff; animation:barMaxPulse 2s ease-in-out infinite; }
+.bar-kiss   .bar-fill.maxed { color:#ffaabb; animation:barMaxPulse 2s ease-in-out infinite; }
+
+/* ── ACTION BUTTONS ──────────────────────────────────────────────────── */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(162px, 1fr));
+  gap: 10px;
+}
+
+.action-btn {
+  background: rgba(28,14,50,0.55);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px 16px 12px;
+  cursor: pointer; color: var(--text);
+  font-family: inherit; font-size: 0.88rem; font-weight: 700;
+  text-align: left;
+  transition: all 0.3s cubic-bezier(0.34,1.4,0.64,1);
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; gap: 4px;
+  backdrop-filter: blur(8px);
+}
+body[dir="rtl"] .action-btn { text-align: right; }
+
+/* shimmer sweep */
+.action-btn::before {
+  content: '';
+  position: absolute; top: 0; left: -120%; width: 70%; height: 100%;
+  background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.06) 50%, transparent 80%);
+  transition: left 0.55s ease;
+  pointer-events: none;
+}
+.action-btn:hover::before { left: 160%; }
+
+/* corner sparkle */
+.action-btn::after {
+  content: '✦';
+  position: absolute; top: 9px; right: 10px;
+  font-size: 0.48rem; opacity: 0;
+  transition: opacity 0.25s; pointer-events: none;
+}
+body[dir="rtl"] .action-btn::after { right: auto; left: 10px; }
+.action-btn:hover::after { opacity: 0.75; }
+
+.btn-label  { font-size: 0.9rem; line-height: 1.3; }
+.btn-effect { font-size: 0.67rem; opacity: 0.58; font-weight: 600; letter-spacing: 0.5px; }
+.btn-count  {
+  position: absolute; bottom: 8px; right: 10px;
+  font-size: 0.6rem; font-weight: 800; opacity: 0.45;
+  transition: opacity 0.25s; letter-spacing: 0.5px;
+}
+body[dir="rtl"] .btn-count { right: auto; left: 10px; }
+.action-btn:hover .btn-count { opacity: 0.9; }
+
+.action-btn:hover  { transform: translateY(-3px) scale(1.02); }
+.action-btn:active { transform: scale(0.95); }
+
+.cat-sleep  { border-color: rgba(123,167,245,0.22); }
+.cat-sleep::after  { color: var(--sleep-b); }
+.cat-sleep:hover   { border-color: rgba(179,204,255,0.5); background: rgba(123,167,245,0.09); box-shadow: 0 8px 32px rgba(123,167,245,0.18), inset 0 0 24px rgba(123,167,245,0.04); }
+.cat-sleep  .btn-effect,.cat-sleep  .btn-count { color: var(--sleep-b); }
+
+.cat-mood   { border-color: rgba(245,133,184,0.22); }
+.cat-mood::after   { color: var(--mood-b); }
+.cat-mood:hover    { border-color: rgba(255,179,217,0.5); background: rgba(245,133,184,0.09); box-shadow: 0 8px 32px rgba(245,133,184,0.18), inset 0 0 24px rgba(245,133,184,0.04); }
+.cat-mood   .btn-effect,.cat-mood   .btn-count { color: var(--mood-b); }
+
+.cat-hunger { border-color: rgba(245,169,107,0.22); }
+.cat-hunger::after { color: var(--hunger-b); }
+.cat-hunger:hover  { border-color: rgba(255,212,168,0.5); background: rgba(245,169,107,0.09); box-shadow: 0 8px 32px rgba(245,169,107,0.18), inset 0 0 24px rgba(245,169,107,0.04); }
+.cat-hunger .btn-effect,.cat-hunger .btn-count { color: var(--hunger-b); }
+
+.cat-study  { border-color: rgba(164,140,245,0.22); }
+.cat-study::after  { color: var(--study-b); }
+.cat-study:hover   { border-color: rgba(201,184,255,0.5); background: rgba(164,140,245,0.09); box-shadow: 0 8px 32px rgba(164,140,245,0.18), inset 0 0 24px rgba(164,140,245,0.04); }
+.cat-study  .btn-effect,.cat-study  .btn-count { color: var(--study-b); }
+
+.cat-kiss   { border-color: rgba(245,94,122,0.22); }
+.cat-kiss::after   { color: var(--kiss-b); }
+.cat-kiss:hover    { border-color: rgba(255,170,187,0.5); background: rgba(245,94,122,0.09); box-shadow: 0 8px 32px rgba(245,94,122,0.18), inset 0 0 24px rgba(245,94,122,0.04); }
+.cat-kiss   .btn-effect,.cat-kiss   .btn-count { color: var(--kiss-b); }
+
+/* ── CUSTOM ACTION ───────────────────────────────────────────────────── */
+.custom-form {
+  display: grid; grid-template-columns: 1fr auto auto;
+  gap: 10px; align-items: center;
+}
+body[dir="rtl"] .custom-form { direction: rtl; }
+
+.custom-input, .custom-select {
+  background: rgba(28,14,50,0.55);
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  padding: 11px 16px; color: var(--text);
+  font-family: inherit; font-size: 0.9rem; font-weight: 600;
+  outline: none; backdrop-filter: blur(8px);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.custom-input::placeholder { color: var(--text-faint); }
+.custom-input:focus, .custom-select:focus {
+  border-color: rgba(196,168,255,0.5);
+  box-shadow: 0 0 0 3px rgba(196,168,255,0.1), 0 0 20px rgba(196,168,255,0.08);
+}
+.custom-select { cursor: pointer; }
+.custom-select option { background: #1e1535; }
+
+.btn-submit {
+  background: linear-gradient(135deg, rgba(196,168,255,0.22), rgba(255,179,217,0.18));
+  border: 1px solid rgba(196,168,255,0.4);
+  color: var(--lav); border-radius: var(--r-sm);
+  padding: 11px 22px; font-family: inherit;
+  font-size: 0.82rem; font-weight: 800; letter-spacing: 0.5px;
+  cursor: pointer; white-space: nowrap; backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.34,1.4,0.64,1);
+}
+.btn-submit:hover {
+  background: linear-gradient(135deg, rgba(196,168,255,0.38), rgba(255,179,217,0.32));
+  border-color: var(--lav); color: #e2d4ff;
+  box-shadow: 0 4px 28px rgba(196,168,255,0.28), 0 0 44px rgba(196,168,255,0.08);
+  transform: translateY(-2px);
+}
+.btn-submit:active { transform: scale(0.96); }
+
+.custom-counter {
+  text-align: center; color: var(--text-dim);
+  font-size: 0.77rem; font-weight: 600; margin-top: 12px; letter-spacing: 0.5px;
+}
+
+/* ── FLOAT TEXT ──────────────────────────────────────────────────────── */
+@keyframes floatUp {
+  0%   { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+  100% { opacity:0; transform:translateX(-50%) translateY(-56px) scale(0.7); }
+}
+.float-text {
+  position: fixed; pointer-events: none;
+  font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 900;
+  color: #d4b0ff; letter-spacing: 1px;
+  text-shadow: 0 0 14px rgba(196,168,255,0.95), 0 0 28px rgba(196,168,255,0.4);
+  animation: floatUp 1.15s ease-out forwards;
+  z-index: 9999;
+}
+
+/* ── ACHIEVEMENT NOTIFICATION ────────────────────────────────────────── */
+.achievement-notif {
+  position: fixed; bottom: 28px; right: -450px; width: 410px;
+  background: linear-gradient(145deg, rgba(26,14,50,0.97) 0%, rgba(14,8,28,0.98) 100%);
+  border: 1px solid rgba(196,168,255,0.22);
+  border-radius: var(--r); padding: 18px 22px;
+  display: flex; align-items: center; gap: 18px;
+  z-index: 10000;
+  transition: right 0.55s cubic-bezier(0.34,1.4,0.64,1);
+  box-shadow: 0 28px 70px rgba(0,0,0,0.75), 0 0 0 1px rgba(196,168,255,0.07);
+  overflow: hidden; backdrop-filter: blur(28px);
+}
+body[dir="rtl"] .achievement-notif {
+  right: auto; left: -450px;
+  transition: left 0.55s cubic-bezier(0.34,1.4,0.64,1);
+}
+.achievement-notif.show { right: 20px; }
+body[dir="rtl"] .achievement-notif.show { right: auto; left: 20px; }
+
+.achievement-notif::before {
+  content: ''; position: absolute; bottom: 0; left: 0;
+  height: 2px; border-radius: 0 0 var(--r) var(--r);
+  animation: notifTimer 4s linear forwards;
+}
+@keyframes notifTimer { from{width:100%;} to{width:0%;} }
+
+.achievement-notif::after {
+  content: ''; position: absolute; top: 0; left: 6%; right: 6%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196,168,255,0.48), transparent);
+}
+
+.notif-bronze::before  { background: linear-gradient(90deg,#b8742a,#f0c070); }
+.notif-silver::before  { background: linear-gradient(90deg,#9898b0,#e0e0f0); }
+.notif-gold::before    { background: linear-gradient(90deg,#d4a820,#f9e4a0); }
+.notif-platinum::before{ background: linear-gradient(90deg,var(--lav),var(--blush)); }
+.notif-secret::before  { background: linear-gradient(90deg,#a855f7,var(--gold-fairy),#a855f7); background-size:200% 100%; animation: notifTimer 4s linear forwards, secretShimmer 1.5s ease-in-out infinite; }
+@keyframes secretShimmer { 0%,100%{background-position:0% 0} 50%{background-position:100% 0} }
+
+.notif-icon {
+  font-size: 2.5rem; flex-shrink: 0;
+  filter: drop-shadow(0 0 12px rgba(196,168,255,0.65));
+  animation: iconBounce 0.55s cubic-bezier(0.34,1.9,0.64,1) forwards;
+}
+@keyframes iconBounce { from{transform:scale(0);} to{transform:scale(1);} }
+
+.notif-type {
+  font-size: 0.56rem; font-weight: 800;
+  letter-spacing: 3px; text-transform: uppercase; margin-bottom: 3px;
+}
+.notif-bronze  .notif-type { color: #f0c070; }
+.notif-silver  .notif-type { color: #d8d8f0; }
+.notif-gold    .notif-type { color: var(--gold-fairy); }
+.notif-platinum .notif-type { color: var(--lav); }
+.notif-secret  .notif-type { color: #c084fc; }
+
+.notif-title { font-size: 1rem; font-weight: 800; color: var(--text); line-height: 1.3; }
+.notif-desc  { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; font-weight: 600; }
+
+/* ── TROPHY MODAL ────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(6,3,14,0.84);
+  z-index: 9998; display: none;
+  justify-content: center; align-items: center;
+  backdrop-filter: blur(10px);
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: linear-gradient(155deg, rgba(26,16,48,0.99) 0%, rgba(12,6,26,0.99) 100%);
+  border: 1px solid rgba(196,168,255,0.2);
+  border-radius: var(--r);
+  width: min(720px,95vw); max-height: 87vh;
+  overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 0 90px rgba(100,50,200,0.22), 0 0 0 1px rgba(196,168,255,0.05);
+  animation: modalIn 0.45s cubic-bezier(0.34,1.4,0.64,1);
+  position: relative;
+}
+.modal::before {
+  content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196,168,255,0.5), rgba(255,179,217,0.3), rgba(196,168,255,0.5), transparent);
+  pointer-events: none;
+}
+@keyframes modalIn {
+  from { transform: scale(0.87) translateY(26px); opacity: 0; }
+  to   { transform: scale(1) translateY(0);        opacity: 1; }
+}
+
+.modal-header {
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid rgba(196,168,255,0.1);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-shrink: 0;
+}
+.modal-header-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 0.88rem; font-weight: 400; letter-spacing: 2px;
+  color: var(--gold-fairy);
+  filter: drop-shadow(0 0 8px rgba(249,228,160,0.5));
+}
+.modal-close {
+  background: rgba(196,168,255,0.05); border: 1px solid rgba(196,168,255,0.18);
+  color: var(--text-dim); width: 34px; height: 34px;
+  border-radius: 50%; cursor: pointer; font-size: 0.88rem;
+  transition: all 0.25s; display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover {
+  border-color: rgba(255,179,217,0.45); color: var(--blush);
+  box-shadow: 0 0 16px rgba(255,179,217,0.18); background: rgba(255,179,217,0.05);
+}
+
+.modal-body {
+  padding: 22px 28px 28px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: rgba(196,168,255,0.18) transparent;
+}
+
+.trophy-stats { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+.trophy-stat {
+  background: rgba(196,168,255,0.05); border: 1px solid rgba(196,168,255,0.13);
+  border-radius: var(--r-sm); padding: 8px 14px;
+  font-size: 0.73rem; font-weight: 700;
+  display: flex; align-items: center; gap: 7px;
+}
+.trophy-stat .count { font-size: 1.05rem; font-weight: 900; }
+
+.trophy-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(185px,1fr));
+  gap: 10px;
+}
+.trophy-section-label {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 0.58rem; font-weight: 400;
+  letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase;
+  margin: 18px 0 10px; padding-bottom: 8px;
+  border-bottom: 1px solid rgba(196,168,255,0.1);
+  grid-column: 1 / -1;
+}
+
+.trophy-card {
+  background: rgba(28,14,50,0.5); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 16px 14px 14px;
+  transition: all 0.3s; position: relative; overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+.trophy-card.unlocked { border-color: rgba(196,168,255,0.28); background: rgba(100,60,180,0.13); }
+.trophy-card.unlocked:hover {
+  transform: translateY(-2px); border-color: rgba(196,168,255,0.48);
+  box-shadow: 0 10px 32px rgba(100,60,180,0.22);
+}
+.trophy-card.locked { opacity: 0.38; filter: grayscale(0.6) brightness(0.65); }
+
+.trophy-card .t-icon  { font-size: 1.85rem; margin-bottom: 7px; display: block; }
+.trophy-card .t-title { font-size: 0.87rem; font-weight: 800; margin-bottom: 3px; color: var(--text); }
+.trophy-card .t-desc  { font-size: 0.7rem; color: var(--text-dim); font-weight: 600; line-height: 1.4; }
+
+.trophy-card .t-badge {
+  position: absolute; top: 10px; right: 10px;
+  font-size: 0.52rem; font-weight: 800; letter-spacing: 1.5px;
+  padding: 2px 8px; border-radius: 100px; text-transform: uppercase;
+}
+body[dir="rtl"] .trophy-card .t-badge { right: auto; left: 10px; }
+
+.badge-bronze  { background: rgba(184,116,42,0.15);  color: #f0c070; border: 1px solid rgba(184,116,42,0.28); }
+.badge-silver  { background: rgba(160,160,188,0.14); color: #d8d8ee; border: 1px solid rgba(160,160,188,0.28); }
+.badge-gold    { background: rgba(212,168,32,0.14);  color: var(--gold-fairy); border: 1px solid rgba(212,168,32,0.28); }
+.badge-platinum{ background: rgba(196,168,255,0.12); color: var(--lav);  border: 1px solid rgba(196,168,255,0.28); }
+.badge-secret  { background: rgba(168,85,247,0.14);  color: #c084fc;    border: 1px solid rgba(168,85,247,0.28); }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .custom-form { grid-template-columns: 1fr 1fr; }
+  .custom-form .custom-input { grid-column: 1/-1; }
+  .actions-grid { grid-template-columns: repeat(2,1fr); }
+  .panel { padding: 20px 18px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Mist blobs -->
+<div class="mist" style="width:450px;height:450px;background:rgba(110,50,210,0.18);top:-100px;left:-130px;--md:20s;--mdelay:0s;--mo:1;--mx:50px;--my:40px;"></div>
+<div class="mist" style="width:380px;height:380px;background:rgba(70,25,160,0.14);top:35%;right:-110px;--md:24s;--mdelay:4s;--mo:1;--mx:-35px;--my:55px;"></div>
+<div class="mist" style="width:520px;height:320px;background:rgba(50,15,120,0.18);bottom:-70px;left:22%;--md:28s;--mdelay:8s;--mo:1;--mx:25px;--my:-45px;"></div>
+<div class="mist" style="width:260px;height:260px;background:rgba(190,90,255,0.07);top:58%;left:8%;--md:22s;--mdelay:11s;--mo:1;--mx:65px;--my:-25px;"></div>
+
+<!-- Sparkle field -->
+<div class="sparkle-field" id="sparkleField"></div>
+
+<div class="top-bar">
+  <button class="btn-pill btn-reset" id="resetBtn">🔄 <span data-en="Reset" data-ar="تصفير">تصفير</span></button>
+  <button class="btn-pill btn-lang" id="langToggle">العربية</button>
+  <button class="btn-pill btn-trophy" id="trophyBtn">🏆 <span data-en="Trophy Room" data-ar="غرفة الكؤوس">Trophy Room</span></button>
+  <button class=" btn-pill btn-sound" id="plaaudiobtn">🔊 <span data-en="play sound" data-ar="تشغيل الصوت">play sound</span></button>
+</div>
+
+<div class="container">
+  <header>
+    <span class="header-crown">✨</span>
+    <div class="header-title" data-en="Boodi's Dashboard" data-ar="داشبورد بودي">Boodi's Dashboard</div>
+    <div class="header-wisp">
+      <span class="wisp-line"></span>
+      <span class="wisp-gem">✦</span>
+      <span class="header-sub" data-en="Life Stats · Personal Quest" data-ar="إحصائيات الحياة · مهمة شخصية">Life Stats · Personal Quest</span>
+      <span class="wisp-gem">✦</span>
+      <span class="wisp-line"></span>
+    </div>
+  </header>
+
+  <div class="panel">
+    <div class="panel-title">🌙 <span data-en="Status Bars" data-ar="شريط الحالة">Status Bars</span></div>
+    <div id="statsContainer"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">⚡ <span data-en="Actions" data-ar="الأفعال">Actions</span></div>
+    <div class="actions-grid" id="actionsGrid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">🌸 <span data-en="Custom Action" data-ar="فعل مخصص">Custom Action</span></div>
+    <div class="custom-form">
+      <input class="custom-input" id="customInput" type="text" placeholder="..." />
+      <select class="custom-select" id="customSelect"></select>
+      <button class="btn-submit" id="customSubmit">✦ Submit</button>
+    </div>
+    <div class="custom-counter" id="customCounter">0</div>
+  </div>
+</div>
+
+<!-- Trophy Modal -->
+<div class="modal-overlay" id="trophyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-title">🏆 <span data-en="Trophy Room" data-ar="غرفة الكؤوس">Trophy Room</span></div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="trophy-stats" id="trophyStats"></div>
+      <div class="trophy-grid" id="trophyGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Achievement Notification -->
+<div class="achievement-notif" id="achieveNotif">
+  <div class="notif-icon" id="notifIcon">🏆</div>
+  <div class="notif-body">
+    <div class="notif-type" id="notifType">TROPHY</div>
+    <div class="notif-title" id="notifTitle"></div>
+    <div class="notif-desc" id="notifDesc"></div>
+  </div>
+</div>
+
+<script>
+// ── I18N ────────────────────────────────────────────────────────────────
+const i18n = {
+  en: {
+    lang:'العربية',statusBars:'Status Bars',actions:'Actions',customAction:'Custom Action',
+    customPlaceholder:'What did you do today? ✨',customCounter:'Custom Actions Used',
+    submit:'✦ Submit',trophyRoom:'Trophy Room',unlocked:'UNLOCKED',locked:'LOCKED',
+    trophy:'TROPHY',bronzeT:'BRONZE',silverT:'SILVER',goldT:'GOLD',platinumT:'PLATINUM',secretT:'★ SECRET ★',
+    bars:{
+      sleep:{label:'😴 Sleep'},mood:{label:'💖 Mood'},
+      hunger:{label:'🍜 Hunger'},study:{label:'📚 Studied'},kiss:{label:'💋 Kisses for Boodi'},
+    },
+    actions:{
+      sleptWell:{label:'Slept Well',effect:'+100% Sleep'},sleptOkay:{label:'Slept Okay',effect:'+50% Sleep'},
+      drankCocoa:{label:'Drank coffee',effect:'+40% Mood'},drankMatcha:{label:'Drank Matcha',effect:'+30% Mood'},
+      drankTea:{label:'Drank Tea',effect:'+20% Mood'},playedGame:{label:'Played a Game',effect:'+30% Mood'},
+      drewDrawing:{label:'Drew a Drawing',effect:'+30% Mood'},ateWell:{label:'Ate Well',effect:'+50% Hunger'},
+      studied:{label:'Studied',effect:'+100% Studied'},kissedBoodi:{label:'I Kissed Boodi',effect:'+30% Kisses'},
+    },
+    customSelect:{sleep:'😴 Sleep',mood:'💖 Mood',hunger:'🍜 Hunger',study:'📚 Studied',kiss:'💋 Kisses'},
+  },
+  ar: {
+    lang:'English',statusBars:'شريط الحالة',actions:'الأفعال',customAction:'فعل مخصص',
+    customPlaceholder:'ماذا فعلتِ اليوم؟ ✨',customCounter:'مرات الفعل المخصص',
+    submit:'✦ إرسال',trophyRoom:'غرفة الكؤوس',unlocked:'مفتوح',locked:'مقفل',
+    trophy:'كأس',bronzeT:'برونز',silverT:'فضة',goldT:'ذهب',platinumT:'بلاتين',secretT:'★ سري ★',
+    bars:{
+      sleep:{label:'😴 شبعانة نوم'},mood:{label:'💖 مزاجي'},
+      hunger:{label:'🍜 جوعي'},study:{label:'📚 درست'},kiss:{label:'💋 بوسات لبودي'},
+    },
+    actions:{
+      sleptWell:{label:'نمتِ كويس',effect:'+100% نوم'},sleptOkay:{label:'نمتِ وسط',effect:'+50% نوم'},
+      drankCocoa:{label:'شربتِ كيكوا',effect:'+40% مزاج'},drankMatcha:{label:'شربتِ متشة',effect:'+30% مزاج'},
+      drankTea:{label:'شربتِ شاهي',effect:'+20% مزاج'},playedGame:{label:'لعبتِ لعبة',effect:'+30% مزاج'},
+      drewDrawing:{label:'رسمتِ رسمة',effect:'+30% مزاج'},ateWell:{label:'أكلتِ زين',effect:'+50% جوع'},
+      studied:{label:'ذاكرتِ',effect:'+100% دراسة'},kissedBoodi:{label:'قبّلتِ بودي',effect:'+30% بوسات'},
+    },
+    customSelect:{sleep:'😴 نوم',mood:'💖 مزاج',hunger:'🍜 جوع',study:'📚 دراسة',kiss:'💋 بوسات'},
+  }
+};
+
+// ── STATE ───────────────────────────────────────────────────────────────
+let lang = localStorage.getItem('lang') || 'en';
+const DEFAULT_STATE = {
+  bars:{sleep:0,mood:0,hunger:0,study:0,kiss:0},
+  levels:{sleep:1,mood:1,hunger:1,study:1,kiss:1}, // أضفنا اللفلات هنا تبدأ من 1
+  counts:{sleptWell:0,sleptOkay:0,drankCocoa:0,drankMatcha:0,drankTea:0,playedGame:0,drewDrawing:0,ateWell:0,studied:0,kissedBoodi:0,custom:0,anyButton:0},
+  barHits100:{sleep:0,mood:0,hunger:0,study:0,kiss:0},
+  unlocked:[],
+};
+function loadState(){try{const s=JSON.parse(localStorage.getItem('rpgState'));if(s)return s;}catch(e){}return JSON.parse(JSON.stringify(DEFAULT_STATE));}
+let state=loadState();
+function saveState(){localStorage.setItem('rpgState',JSON.stringify(state));}
+
+// ── ACHIEVEMENTS ────────────────────────────────────────────────────────
+const ACHIEVEMENTS=[
+  {id:'firstStep',tier:'bronze',icon:'🥉',en:['First Step','Clicked an action for the first time!'],ar:['بسم الله نبدأ','أول كبسة!']},
+  {id:'perfectBalance',tier:'platinum',icon:'🏆',en:['Perfect Balance','All 5 bars at 100% simultaneously!'],ar:['توازن مثالي','كل الشرائط ١٠٠٪ بنفس الوقت!']},
+  {id:'sleepingBeauty',tier:'bronze',icon:'🥉',en:['Sleeping Beauty','Sleep hit 100%!'],ar:['جميلة النائمين','شريط النوم وصل ١٠٠٪!']},
+  {id:'snoozeButton',tier:'silver',icon:'🥈',en:['Snooze Button','Slept okay 3 times'],ar:['غفوة خمس دقايق','نمتِ وسط ٣ مرات']},
+  {id:'koalaMode',tier:'gold',icon:'🥇',en:['Koala Mode','Slept well 5 times!'],ar:['كوالا','نمتِ كويس ٥ مرات!']},
+  {id:'hibernation',tier:'platinum',icon:'🏆',en:['Hibernation','Slept well 20 times!'],ar:['سبات شتوي','نمتِ كويس ٢٠ مرة!']},
+  {id:'matchaLover',tier:'bronze',icon:'🥉',en:['Matcha Lover','Had matcha once'],ar:['عاشقة المتشة','شربتِ متشة مرة']},
+  {id:'teaTime',tier:'bronze',icon:'🥉',en:['Tea Time','Had tea once'],ar:['مزاج الشاهي','شربتِ شاهي مرة']},
+  {id:'chocoholic',tier:'silver',icon:'🥈',en:['Chocoholic','Drank cocoa 3 times'],ar:['مدمنة كاكاو','شربتِ كيكوا ٣ مرات']},
+  {id:'foodie',tier:'silver',icon:'🥈',en:['Foodie','Ate well 5 times!'],ar:['أكّيلة','أكلتِ زين ٥ مرات!']},
+  {id:'zenMaster',tier:'gold',icon:'🥇',en:['Zen Master','Mood bar hit 100% 5 times!'],ar:['رايقة','شريط المزاج ١٠٠٪ خمس مرات!']},
+  {id:'masterBarista',tier:'platinum',icon:'🏆',en:['Master Barista','Had cocoa, matcha AND tea!'],ar:['باريستا','شربتِ كيكوا ومتشة وشاهي!']},
+  {id:'picasso',tier:'bronze',icon:'🥉',en:['Picasso','Drew a drawing once!'],ar:['بيكاسو','رسمتِ رسمة واحدة!']},
+  {id:'artGallery',tier:'silver',icon:'🥈',en:['Art Gallery','Drew 5 drawings!'],ar:['معرض فني','رسمتِ ٥ رسمات!']},
+  {id:'gamerGirl',tier:'bronze',icon:'🥉',en:['Gamer Girl','Played a game once!'],ar:['جيمر','لعبتِ لعبة واحدة!']},
+  {id:'proGamer',tier:'gold',icon:'🥇',en:['Pro Gamer','Played 10 games!'],ar:['محترفة','لعبتِ ١٠ ألعاب!']},
+  {id:'renaissanceWoman',tier:'platinum',icon:'🏆',en:['Renaissance Woman','Drew 10 times AND played 10 times!'],ar:['متعددة المواهب','رسمتِ ١٠ ولعبتِ ١٠!']},
+  {id:'aStudentPlus',tier:'bronze',icon:'🥉',en:['A+ Student','Study bar hit 100%!'],ar:['دافورة','شريط الدراسة ١٠٠٪!']},
+  {id:'bookworm',tier:'silver',icon:'🥈',en:['Bookworm','Studied 5 times!'],ar:['دودة كتب','ذاكرتِ ٥ مرات!']},
+  {id:'einstein',tier:'gold',icon:'🥇',en:['Einstein','Studied 10 times!'],ar:['آينشتاين','ذاكرتِ ١٠ مرات!']},
+  {id:'phdCandidate',tier:'platinum',icon:'🏆',en:['PhD Candidate','Studied 25 times!'],ar:['مشروع دكتوراه','ذاكرتِ ٢٥ مرة!']},
+  {id:'sweetStart',tier:'bronze',icon:'🥉',en:['Sweet Start','Kissed Boodi once!'],ar:['بداية حلوة','قبّلتِ بودي مرة!']},
+  {id:'boodiFav',tier:'silver',icon:'🥈',en:["Boodi's Favorite",'Kissed Boodi 10 times!'],ar:['حبيبة بودي','قبّلتِ بودي ١٠ مرات!']},
+  {id:'soulmates',tier:'gold',icon:'🥇',en:['Soulmates','Kissed Boodi 50 times!'],ar:['توأم الروح','قبّلتِ بودي ٥٠ مرة!']},
+  {id:'infiniteLove',tier:'platinum',icon:'🏆',en:['Infinite Love','Kissed Boodi 100 times!'],ar:['حب لا نهائي','قبّلتِ بودي ١٠٠ مرة!']},
+  {id:'boodisOxygen',tier:'secret',icon:'👑',en:["Boodi's Oxygen",'★ SECRET ★ Kissed Boodi 500 times!'],ar:['أكسجين بودي','★ سري ★ قبّلتِ بودي ٥٠٠ مرة!']},
+  {id:'selfCareQueen',tier:'bronze',icon:'🥉',en:['Self-Care Queen','Used Custom Action once!'],ar:['ملكة الدلع','فعل مخصص مرة!']},
+  {id:'mainCharacter',tier:'silver',icon:'🥈',en:['Main Character','Used Custom Action 5 times!'],ar:['الشخصية الرئيسية','فعل مخصص ٥ مرات!']},
+  {id:'journalist',tier:'gold',icon:'🥇',en:['Journalist','Used Custom Action 15 times!'],ar:['كاتبة يوميات','فعل مخصص ١٥ مرة!']},
+];
+
+const ACTIONS=[
+  {id:'sleptWell',bar:'sleep',delta:100,cat:'sleep'},{id:'sleptOkay',bar:'sleep',delta:50,cat:'sleep'},
+  {id:'drankCocoa',bar:'mood',delta:40,cat:'mood'},{id:'drankMatcha',bar:'mood',delta:30,cat:'mood'},
+  {id:'drankTea',bar:'mood',delta:20,cat:'mood'},{id:'playedGame',bar:'mood',delta:30,cat:'mood'},
+  {id:'drewDrawing',bar:'mood',delta:30,cat:'mood'},{id:'ateWell',bar:'hunger',delta:50,cat:'hunger'},
+  {id:'studied',bar:'study',delta:100,cat:'study'},{id:'kissedBoodi',bar:'kiss',delta:30,cat:'kiss'},
+];
+
+// ── NOTIFICATION QUEUE ──────────────────────────────────────────────────
+let notifQueue=[],notifShowing=false;
+function queueNotif(ach){notifQueue.push(ach);if(!notifShowing)processNotifQueue();}
+function processNotifQueue(){if(!notifQueue.length){notifShowing=false;return;}notifShowing=true;showNotif(notifQueue.shift());setTimeout(processNotifQueue,4800);}
+
+function showNotif(ach){
+  const notif=document.getElementById('achieveNotif');
+  const t=i18n[lang];
+  const tierLabels={bronze:t.bronzeT,silver:t.silverT,gold:t.goldT,platinum:t.platinumT,secret:t.secretT};
+  const tierClass={bronze:'notif-bronze',silver:'notif-silver',gold:'notif-gold',platinum:'notif-platinum',secret:'notif-secret'};
+  const data=lang==='ar'?ach.ar:ach.en;
+  notif.className='achievement-notif '+(tierClass[ach.tier]||'');
+  document.getElementById('notifIcon').textContent=ach.icon;
+  document.getElementById('notifType').textContent=tierLabels[ach.tier]||'TROPHY';
+  document.getElementById('notifTitle').textContent=data[0];
+  document.getElementById('notifDesc').textContent=data[1];
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const notes=ach.tier==='secret'?[523,659,784,1047]:ach.tier==='platinum'?[523,659,784]:ach.tier==='gold'?[523,659]:[523];
+    notes.forEach((freq,i)=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.frequency.value=freq;osc.type='sine';
+      gain.gain.setValueAtTime(0.12,ctx.currentTime+i*0.13);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.13+0.28);
+      osc.start(ctx.currentTime+i*0.13);osc.stop(ctx.currentTime+i*0.13+0.32);
+    });
+  }catch(e){}
+  notif.classList.add('show');
+  setTimeout(()=>notif.classList.remove('show'),4000);
+}
+
+function checkAchievements(){
+  const c=state.counts,b=state.bars,h=state.barHits100;
+  const cond={
+    firstStep:c.anyButton>=1,
+    perfectBalance:b.sleep>=100&&b.mood>=100&&b.hunger>=100&&b.study>=100&&b.kiss>=100,
+    sleepingBeauty:h.sleep>=1,snoozeButton:c.sleptOkay>=3,koalaMode:c.sleptWell>=5,hibernation:c.sleptWell>=20,
+    matchaLover:c.drankMatcha>=1,teaTime:c.drankTea>=1,chocoholic:c.drankCocoa>=3,foodie:c.ateWell>=5,
+    zenMaster:h.mood>=5,masterBarista:c.drankCocoa>=1&&c.drankMatcha>=1&&c.drankTea>=1,
+    picasso:c.drewDrawing>=1,artGallery:c.drewDrawing>=5,gamerGirl:c.playedGame>=1,proGamer:c.playedGame>=10,
+    renaissanceWoman:c.drewDrawing>=10&&c.playedGame>=10,
+    aStudentPlus:h.study>=1,bookworm:c.studied>=5,einstein:c.studied>=10,phdCandidate:c.studied>=25,
+    sweetStart:c.kissedBoodi>=1,boodiFav:c.kissedBoodi>=10,soulmates:c.kissedBoodi>=50,
+    infiniteLove:c.kissedBoodi>=100,boodisOxygen:c.kissedBoodi>=500,
+    selfCareQueen:c.custom>=1,mainCharacter:c.custom>=5,journalist:c.custom>=15,
+  };
+  ACHIEVEMENTS.forEach(ach=>{
+    if(!state.unlocked.includes(ach.id)&&cond[ach.id]){state.unlocked.push(ach.id);queueNotif(ach);}
+  });
+}
+
+function updateBar(barId,delta){
+  const prev=state.bars[barId];
+  let newValue = prev + delta;
+  
+  // حماية في حال كانت بياناتها القديمة محفوظة بدون لفلات
+  if (!state.levels) state.levels = {sleep:1,mood:1,hunger:1,study:1,kiss:1};
+
+  if (newValue >= 100) {
+    state.barHits100[barId] = (state.barHits100[barId] || 0) + 1;
+    state.levels[barId] = (state.levels[barId] || 1) + 1; // زيادة اللفل
+    newValue = newValue - 100; // إعادة الشريط للصفر مع الاحتفاظ بالفائض
+    spawnFloat('✨ Level Up!', window.innerWidth/2, window.innerHeight/2); // رسالة منبثقة
+  }
+  
+  state.bars[barId] = newValue;
+  renderBars();
+}
+
+function renderBars(){
+  const t=i18n[lang];
+  ['sleep','mood','hunger','study','kiss'].forEach(barId=>{
+    const val=state.bars[barId];
+    const lvl=state.levels ? (state.levels[barId] || 1) : 1;
+    const fill=document.querySelector(`.bar-${barId} .bar-fill`);
+    const valueEl=document.querySelector(`.bar-${barId} .stat-value`);
+    const levelEl=document.querySelector(`.bar-${barId} .stat-level`);
+    
+    if(fill){fill.style.width=val+'%'; fill.classList.toggle('maxed',val>=100);}
+    if(valueEl)valueEl.textContent=val+'%';
+    if(levelEl)levelEl.textContent='Lv.'+lvl;
+    
+    const labelEl=document.querySelector(`.bar-${barId} .stat-label span:first-child`);
+    if(labelEl)labelEl.textContent=t.bars[barId].label;
+  });
+}
+
+function spawnFloat(text,x,y){
+  const el=document.createElement('div');
+  el.className='float-text';el.textContent=text;
+  el.style.left=x+'px';el.style.top=y+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1200);
+}
+
+function renderStatsContainer(){
+  const t=i18n[lang];
+  if(!state.levels) state.levels = {sleep:1,mood:1,hunger:1,study:1,kiss:1};
+  document.getElementById('statsContainer').innerHTML=
+    ['sleep','mood','hunger','study','kiss'].map(barId=>`
+      <div class="stat-row bar-${barId}">
+        <div class="stat-header">
+          <div class="stat-label">
+            <span>${t.bars[barId].label}</span>
+            <span class="stat-level">Lv.${state.levels[barId]}</span>
+          </div>
+          <div class="stat-value">${state.bars[barId]}%</div>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${state.bars[barId]}%"></div>
+        </div>
+      </div>`).join('');
+}
+
+function renderActions(){
+  const t=i18n[lang];
+  const grid=document.getElementById('actionsGrid');
+  grid.innerHTML=ACTIONS.map(a=>{
+    const info=t.actions[a.id];
+    return`<button class="action-btn cat-${a.cat}" data-action="${a.id}">
+      <span class="btn-label">${info.label}</span>
+      <span class="btn-effect">${info.effect}</span>
+      <span class="btn-count">✦ ${state.counts[a.id]||0}</span>
+    </button>`;
+  }).join('');
+  grid.querySelectorAll('.action-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const id=btn.dataset.action;
+      const action=ACTIONS.find(a=>a.id===id);
+      state.counts[id]=(state.counts[id]||0)+1;
+      state.counts.anyButton++;
+      updateBar(action.bar,action.delta);
+      btn.querySelector('.btn-count').textContent='✦ '+state.counts[id];
+      const rect=btn.getBoundingClientRect();
+      const pct=i18n[lang].actions[id].effect.match(/\d+/)?.[0]||'?';
+      spawnFloat('+'+pct+'%',rect.left+rect.width/2,rect.top-10);
+      checkAchievements();saveState();
+    });
+  });
+}
+
+function renderCustomSelect(){
+  document.getElementById('customSelect').innerHTML=
+    Object.entries(i18n[lang].customSelect).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+}
+
+function renderCustomCounter(){
+  document.getElementById('customCounter').textContent=
+    `✦ ${i18n[lang].customCounter}: ${state.counts.custom}`;
+}
+
+function renderTrophyModal(){
+  const t=i18n[lang];
+  const total=ACHIEVEMENTS.length,unlockedCount=state.unlocked.length;
+  const byTier={bronze:0,silver:0,gold:0,platinum:0,secret:0};
+  state.unlocked.forEach(id=>{const a=ACHIEVEMENTS.find(x=>x.id===id);if(a)byTier[a.tier]++;});
+  document.getElementById('trophyStats').innerHTML=`
+    <div class="trophy-stat"><span style="color:#f0c070">🥉</span><span class="count" style="color:#f0c070">${byTier.bronze}</span>${t.bronzeT}</div>
+    <div class="trophy-stat"><span style="color:#d8d8ee">🥈</span><span class="count" style="color:#d8d8ee">${byTier.silver}</span>${t.silverT}</div>
+    <div class="trophy-stat"><span style="color:var(--gold-fairy)">🥇</span><span class="count" style="color:var(--gold-fairy)">${byTier.gold}</span>${t.goldT}</div>
+    <div class="trophy-stat"><span style="color:var(--lav)">🏆</span><span class="count" style="color:var(--lav)">${byTier.platinum}</span>${t.platinumT}</div>
+    <div class="trophy-stat"><span style="color:#c084fc">👑</span><span class="count" style="color:#c084fc">${byTier.secret}</span>${t.secretT}</div>
+    <div class="trophy-stat" style="margin-left:auto"><span class="count" style="color:var(--blush)">${unlockedCount}/${total}</span></div>`;
+  const sections=[
+    {label:lang==='ar'?'عام':'General',ids:['firstStep','perfectBalance']},
+    {label:lang==='ar'?'نوم':'Sleep',ids:['sleepingBeauty','snoozeButton','koalaMode','hibernation']},
+    {label:lang==='ar'?'طعام وشراب':'Food & Drinks',ids:['matchaLover','teaTime','chocoholic','foodie','zenMaster','masterBarista']},
+    {label:lang==='ar'?'هوايات':'Hobbies',ids:['picasso','artGallery','gamerGirl','proGamer','renaissanceWoman']},
+    {label:lang==='ar'?'دراسة':'Study',ids:['aStudentPlus','bookworm','einstein','phdCandidate']},
+    {label:lang==='ar'?'بوسات بودي':'Boodi Kisses',ids:['sweetStart','boodiFav','soulmates','infiniteLove','boodisOxygen']},
+    {label:lang==='ar'?'مخصص':'Custom',ids:['selfCareQueen','mainCharacter','journalist']},
+  ];
+  const badgeClass={bronze:'badge-bronze',silver:'badge-silver',gold:'badge-gold',platinum:'badge-platinum',secret:'badge-secret'};
+  const tierLabel={bronze:t.bronzeT,silver:t.silverT,gold:t.goldT,platinum:t.platinumT,secret:t.secretT};
+  document.getElementById('trophyGrid').innerHTML=sections.map(sec=>{
+    const cards=sec.ids.map(id=>{
+      const ach=ACHIEVEMENTS.find(a=>a.id===id);if(!ach)return'';
+      const isUnlocked=state.unlocked.includes(id);
+      const data=lang==='ar'?ach.ar:ach.en;
+      return`<div class="trophy-card ${isUnlocked?'unlocked':'locked'}">
+        <span class="t-icon">${ach.icon}</span>
+        <div class="t-title">${data[0]}</div>
+        <div class="t-desc">${isUnlocked?data[1]:'???'}</div>
+        <span class="t-badge ${badgeClass[ach.tier]}">${tierLabel[ach.tier]}</span>
+      </div>`;
+    }).join('');
+    return`<div class="trophy-section-label">${sec.label}</div>${cards}`;
+  }).join('');
+}
+
+function renderAll(){
+  document.documentElement.lang=lang;
+  document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+  document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=lang==='ar'?el.dataset.ar:el.dataset.en;});
+  document.getElementById('langToggle').textContent=i18n[lang].lang;
+  document.getElementById('customInput').placeholder=i18n[lang].customPlaceholder;
+  document.getElementById('customSubmit').textContent=i18n[lang].submit;
+  renderStatsContainer();renderActions();renderCustomSelect();renderCustomCounter();
+}
+
+// ── EVENTS ──────────────────────────────────────────────────────────────
+document.getElementById('langToggle').addEventListener('click',()=>{lang=lang==='en'?'ar':'en';localStorage.setItem('lang',lang);renderAll();});
+// كود تشغيل الصوت
+const myaudio =new Audio('Recording (4).mp4');
+myaudio.loop=true;
+document.getElementById('plaaudiobtn').addEventListener('click',()=>{
+  if(myaudio.paused) {
+    myaudio.play();
+  } else {
+    myaudio.pause();
+  }
+});
+// كود إعادة تعيين التقدم (تصفير)
+document.getElementById('resetBtn').addEventListener('click', () => {
+  // رسالة التأكيد حسب اللغة
+  const confirmMsg = lang === 'ar' 
+    ? 'متأكدة أنك تبين تحذفين كل إنجازاتك ونبدأ من جديد؟ 🥺' 
+    : 'Are you sure you want to reset all your progress? 🥺';
+  
+  if (confirm(confirmMsg)) {
+    localStorage.removeItem('rpgState'); // مسح البيانات المخزنة
+    location.reload(); // تحديث الصفحة لترجع كأنها جديدة
+  }
+});
+document.getElementById('customSubmit').addEventListener('click',()=>{
+  const input=document.getElementById('customInput'),sel=document.getElementById('customSelect');
+  if(!input.value.trim()){
+    input.style.borderColor='rgba(255,179,217,0.55)';input.style.boxShadow='0 0 0 3px rgba(255,179,217,0.12)';
+    setTimeout(()=>{input.style.borderColor='';input.style.boxShadow='';},900);return;
+  }
+  updateBar(sel.value,25);state.counts.custom++;state.counts.anyButton++;input.value='';
+  renderCustomCounter();checkAchievements();saveState();
+  spawnFloat('+25%',window.innerWidth/2,window.innerHeight/2);
+});
+document.getElementById('trophyBtn').addEventListener('click',()=>{renderTrophyModal();document.getElementById('trophyModal').classList.add('open');});
+document.getElementById('modalClose').addEventListener('click',()=>{document.getElementById('trophyModal').classList.remove('open');});
+document.getElementById('trophyModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');});
+
+// ── SPARKLES ────────────────────────────────────────────────────────────
+function makeSparkles(){
+  const field=document.getElementById('sparkleField');
+  for(let i=0;i<30;i++){
+    const s=document.createElement('div');s.className='sparkle';
+    s.style.left=Math.random()*100+'%';
+    s.style.top=Math.random()*100+'%';
+    s.style.animationDuration=(Math.random()*3+2)+'s';
+    s.style.animationDelay=(Math.random()*5)+'s';
+    field.appendChild(s);
+  }
+} 
+
+makeSparkles();
+renderAll();
+</script>
+</body>
+</html>
